@@ -40,7 +40,7 @@ void setup() {
 
 // List of patterns to cycle through.  Each is defined as a separate function below.
 typedef void (*SimplePatternList[])();
-SimplePatternList gPatterns = { rainbow, bpm };
+SimplePatternList gPatterns = { rainbow };
 
 uint8_t gCurrentPatternNumber = 0; // Index number of which pattern is current
 uint8_t gHue = 0; // rotating "base color" used by many of the patterns
@@ -68,10 +68,31 @@ void nextPattern()
   gCurrentPatternNumber = (gCurrentPatternNumber + 1) % ARRAY_SIZE( gPatterns);
 }
 
+void sagiv_fill_rainbow( struct CRGB * pFirstLED, int numToFill,
+                  uint8_t initialhue,
+                  uint8_t deltahue )
+{
+    CHSV hsv;
+    hsv.hue = initialhue;
+    hsv.val = 155;
+    hsv.sat = 240;
+    int pos = beatsin16(5, 0, NUM_LEDS);
+    for( int i = 0; i < numToFill; i++) {
+        if ((i > pos) && (i < pos + 10)) {
+          hsv.val += (i - pos) * 10;
+        }
+        if ((i > pos - 10) && (i < pos)) {
+          hsv.val += (pos - i) * 10;
+        }
+        pFirstLED[i] = hsv;
+        hsv.hue += deltahue;
+    }
+}
+
 void rainbow() 
 {
   // FastLED's built-in rainbow generator
-  fill_rainbow( leds, NUM_LEDS, gHue, 7);
+  sagiv_fill_rainbow( leds, NUM_LEDS, gHue, 7);
 }
 
 void rainbowWithGlitter() 
@@ -124,4 +145,5 @@ void juggle() {
     dothue += 32;
   }
 }
+
 
